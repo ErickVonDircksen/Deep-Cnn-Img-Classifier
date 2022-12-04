@@ -13,7 +13,7 @@ data_dir = 'data'
 #tratamento dos imgs
 
 #loading com keras
-data = tf.keras.utils.image_dataset_from_directory('data',batch_size=16,shuffle=True) # Keras cria um dataset com labels, resized images,batch size etc... 
+data = tf.keras.utils.image_dataset_from_directory('data',batch_size=32,shuffle=True) # Keras cria um dataset com labels, resized images,batch size etc... 
 
 #pré porcessamento
 data = data.map(lambda x,y:(x/255,y)) # normaliza os valores da imagem, para melhorar o desempenho.
