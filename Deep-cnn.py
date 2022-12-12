@@ -5,10 +5,11 @@ from matplotlib import pyplot as plt
 import keras
 from keras.layers import  Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
+import cv2
 #--------------------------------------------------------------------- #
 # Erick H. Dircksen, Christian A. Carneiro, Raian A. Moretti 
 #--------------------------------------------------------------------- #
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+#os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 #-------- tensorflow v2.8.0-----cuda v11.0.194-------cDNN v8.0-------#
 #gpus = tf.config.experimental.list_physical_devices('GPU')
 #for gpu in gpus:
@@ -20,46 +21,50 @@ data_dir = 'data'
 #loading com keras
 data = tf.keras.utils.image_dataset_from_directory('data',batch_size=32,shuffle=True) # Keras cria um dataset com labels, resized images,batch size etc... 
 
+class_names = data.class_names
+print(class_names)
+
 #pré porcessamento
 data = data.map(lambda x,y:(x/255,y)) # normaliza os valores da imagem, para melhorar o desempenho.
-#dataIterator = data.as_numpy_iterator() # cria im iterator pra podermos visualizar os batches de dados
-           
+# dataIterator = data.as_numpy_iterator() # cria um iterator pra podermos visualizar os batches de dados   
 
-trainSize = int(len(data)*.7)   # 70% para treinamento
-validSize = int(len(data)*.2)+1 # 20% para validação
-testSize  = int(len(data)*.1)+1 # 10% to evaluation 
-
-#print(trainSize+validSize+testSize) # confirma se os batches foram divididos corretamente
+trainSize = int(len(data)*.80) # 80% para treinamento
+validSize = int(len(data)*.20) # 20% para validação
 
 train = data.take(trainSize)                         # pega os batches para treinaemento
-val  =  data.skip(trainSize).take(validSize)         # pega os batches para validadção pulandos os q foram pegos para treinamento 
-test =  data.skip(trainSize+validSize).take(testSize)# o mesmo para os batches de teste
-
+val = data.skip(trainSize).take(validSize)         # pega os batches para validação pulandos os q foram pegos para treinamento 
 
 # AI TIME!!!
 
 model = tf.keras.models.Sequential() # inicia o modelo
+
 model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(256,256,3)))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+model.add(Conv2D(32, kernel_size=(3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2,2)))
+
 model.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+model.add(Conv2D(64, kernel_size=(3, 3), strides=(2,2), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2,2)))
+
+model.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
+model.add(Conv2D(128, kernel_size=(3, 3), strides=(2,2), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2,2)))
+
+model.add(Conv2D(256, kernel_size=(3, 3), activation='relu'))
+model.add(Conv2D(256, kernel_size=(3, 3), strides=(2,2), activation='relu'))
+#model.add(MaxPooling2D(pool_size=(2, 2), strides=(2,2)))
+
+model.add(Dropout(0.2))
 model.add(Flatten())
-model.add(tf.keras.layers.Dense(256,activation='relu',input_shape=(256,256,3)))
-model.add(tf.keras.layers.Dense(64, activation='relu'))
-model.add(tf.keras.layers.Dense(3, activation='softmax'))
+model.add(tf.keras.layers.Dense(128,activation='relu'))
+# model.add(tf.keras.layers.Dense(64, activation='relu'))
+model.add(tf.keras.layers.Dense(6, activation='softmax'))
 
-
-model.compile(loss=keras.losses.sparse_categorical_crossentropy,optimizer='adam', metrics=['accuracy']) #compila o modelo
+model.compile(loss=keras.losses.sparse_categorical_crossentropy,optimizer='adam', metrics=['accuracy'],) #compila o modelo
 model.summary() #mostra os resultos do modelo.
 
-logdir='logs'   #cria logs pra fine tunning do moledo
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
-
-hist = model.fit(train, epochs=15, validation_data=val,verbose="auto") # treinamento 
-metric=  tf.keras.metrics.SparseCategoricalCrossentropy()
-
+hist = model.fit(train, epochs=15, validation_data=val,verbose="auto",) # treinamento 
+model.save(os.path.join('models','imageclassifier-3-argumented.h5'))
 # plota o resultado
 plt.plot(hist.history['loss'], label='Loss training data')
 plt.plot(hist.history['val_loss'], label='Loss Validation Data')
@@ -72,20 +77,9 @@ plt.show()
 
 
 
-# evaluate
-pre = tf.keras.metrics.Precision()
-re = tf.keras.metrics.Recall()
-acc = tf.keras.metrics.BinaryAccuracy()
-for batch in test.as_numpy_iterator(): 
-    X, y = batch
-    yhat = model.predict(X)
-    pre.update_state(y, yhat)
-    re.update_state(y, yhat)
-    acc.update_state(y, yhat)
 
-print('\n')
-print(pre.result(), re.result(), acc.result())
+# evaluate
+loss,accuracy = model.evaluate(val) # testa dois batches
+print(loss,accuracy) #mostra os resultados do teste
 
 #save the model
-model.save(os.path.join('models','imageclassifier.h5'))
-
