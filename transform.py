@@ -1,10 +1,9 @@
 import os
 import cv2
-import sys
 import random
 import numpy as np
 
-directory = 'data\lambari'
+directory = 'data\/Tilapia'
 
 
 def transform(fileName):
@@ -26,13 +25,9 @@ def transform(fileName):
 
     # Blur image and save it to OUT_PATH + 'blurred5x5.png'
     cv2.imwrite(OUT_PATH + name + 'blurred 3x3.png', cv2.blur(IN_IMAGE, (3, 3)))
-    cv2.imwrite(OUT_PATH + name + 'blurred 5x5.png', cv2.blur(IN_IMAGE, (5, 5)))
-    cv2.imwrite(OUT_PATH + name + 'blurred 1x15.png', cv2.blur(IN_IMAGE, (1, 15)))
     cv2.imwrite(OUT_PATH + name + 'blurred 15x15.png', cv2.blur(IN_IMAGE, (15, 15)))
-    cv2.imwrite(OUT_PATH + name + 'blurred 50x50.png', cv2.blur(IN_IMAGE, (50, 50)))
     cv2.imwrite(OUT_PATH + name + 'gaussian blurred 15x15.png', cv2.GaussianBlur(IN_IMAGE, (15, 15), 0))
-    cv2.imwrite(OUT_PATH + name + 'gaussian blurred 50x50.png', cv2.GaussianBlur(IN_IMAGE, (25, 25), 0))
-
+    
     # Draw a random black box on the image and save it to OUT_PATH + 'blackbox.png'
     def blackbox(img, w, h):
         img = img.copy()
@@ -45,7 +40,7 @@ def transform(fileName):
 
     cv2.imwrite(OUT_PATH + name + 'blackbox 10%.png', blackbox(IN_IMAGE, SIZE_X*0.1, SIZE_Y*0.1))
     cv2.imwrite(OUT_PATH + name + 'blackbox 25%.png', blackbox(IN_IMAGE, SIZE_X*0.25, SIZE_Y*0.25))
-    cv2.imwrite(OUT_PATH + name + 'blackbox 50%.png', blackbox(IN_IMAGE, SIZE_X*0.5, SIZE_Y*0.5))
+
 
     # Rotate the image and save it to OUT_PATH + 'rotated.png'
     def rotate(img, angle):
@@ -54,10 +49,7 @@ def transform(fileName):
     cv2.imwrite(OUT_PATH + name + 'rotated 45.png', rotate(IN_IMAGE, 45))
     cv2.imwrite(OUT_PATH + name + 'rotated 90.png', rotate(IN_IMAGE, 90))
     cv2.imwrite(OUT_PATH + name + 'rotated 180.png', rotate(IN_IMAGE, 180))
-    cv2.imwrite(OUT_PATH + name + 'rotated 270.png', rotate(IN_IMAGE, 270))
-
-    # Reflect the image and save it to OUT_PATH + 'reflected.png'
-    cv2.imwrite(OUT_PATH + name + 'reflected.png', cv2.flip(IN_IMAGE, 1))
+   
 
     # Dilate the image and save it to OUT_PATH + 'dilated.png'
     def dilate(img, iterations):
@@ -65,8 +57,6 @@ def transform(fileName):
         return cv2.dilate(img, kernel, iterations=iterations)
 
     cv2.imwrite(OUT_PATH + name + 'dilated 1x.png', dilate(IN_IMAGE, 1))
-    cv2.imwrite(OUT_PATH + name + 'dilated 2x.png', dilate(IN_IMAGE, 2))
-    cv2.imwrite(OUT_PATH + name + 'dilated 10x.png', dilate(IN_IMAGE, 3))
     cv2.imwrite(OUT_PATH + name + 'dilated 20x.png', dilate(IN_IMAGE, 4))
     cv2.imwrite(OUT_PATH + name + 'dilated 50x.png', dilate(IN_IMAGE, 5))
 
@@ -86,11 +76,11 @@ def transform(fileName):
     cv2.imwrite(OUT_PATH + name + 'hue -270.png', hue(IN_IMAGE, -270))
 
     # Compress image with JPEG and save it
-    cv2.imwrite(OUT_PATH + name + 'compressed 5.jpg', IN_IMAGE, [cv2.IMWRITE_JPEG_QUALITY, 5])
+   
     cv2.imwrite(OUT_PATH + name + 'compressed 10.jpg', IN_IMAGE, [cv2.IMWRITE_JPEG_QUALITY, 10])
     cv2.imwrite(OUT_PATH + name + 'compressed 50.jpg', IN_IMAGE, [cv2.IMWRITE_JPEG_QUALITY, 50])
     cv2.imwrite(OUT_PATH + name + 'compressed 75.jpg', IN_IMAGE, [cv2.IMWRITE_JPEG_QUALITY, 75])
-    cv2.imwrite(OUT_PATH + name + 'compressed 90.jpg', IN_IMAGE, [cv2.IMWRITE_JPEG_QUALITY, 90])
+
     print('Saving to:', OUT_PATH)
     
 for filename in os.listdir(directory):
